@@ -1,0 +1,9 @@
+[Unit]
+Description=Wakeup fix
+
+[Service]
+ExecStart=/bin/sh -c '/bin/echo XHC > /proc/acpi/wakeup; /bin/echo LID0 > /proc/acpi/wakeup; /bin/echo PBTN > /proc/acpi/wakeup; /bin/echo deep > /sys/power/mem_sleep'
+
+
+[Install]
+WantedBy=multi-user.target
