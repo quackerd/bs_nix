@@ -11,4 +11,4 @@ chmod 644 ~/.ssh/id_op52.pub
 
 echo "Configuring keychain..."
 echo "# Configured for keychain" >> ~/.bashrc
-echo "eval \`keychain --eval --agents ssh id_op52\`" >> ~/.bashrc
+echo "eval \`keychain --quiet --eval --agents ssh id_op52\`" >> ~/.bashrc
