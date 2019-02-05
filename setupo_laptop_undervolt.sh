@@ -1,8 +1,7 @@
 #!/bin/bash
 
 echo "Installing undervolt packages"
-sudo apt install -y python-pip
-sudo apt-get -y autoremove
+sudo dnf install -y python-pip
 sudo pip install undervolt
 
 

@@ -1,4 +1,0 @@
-#!/bin/bash
-
-apt-mark showmanual > ~/.pkgsrc/pkgs_cur
-diff --suppress-common-lines -y ~/.pkgsrc/pkgs_cur ~/.pkgsrc/pkgs_org
