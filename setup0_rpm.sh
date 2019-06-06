@@ -1,9 +1,5 @@
 #!/bin/sh
 
-echo "Enabling workstation repos"
-dnf install fedora-workstation-repositories
-dnf config-manager --set-enabled google-chrome
-
 echo "Enabling RPMFusion..."
 sudo rpm-ostree install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
@@ -29,8 +25,7 @@ sudo dnf install -y vim \
 	       	git \
 	       	dconf-editor \
 		steam \
-		code \
-		google-chrome-stable
+		code 
 
 ibus restart
 
