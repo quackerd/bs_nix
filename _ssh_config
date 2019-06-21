@@ -1,0 +1,19 @@
+Host pancake
+	HostName pancake.rcs.uwaterloo.ca
+	User oscar
+	Port 77
+
+Host goose
+	HostName goose.quacker.org
+	User quacker
+	Port 29
+
+Host parrot
+	HostName parrot.quacker.org
+	User quacker
+	Port 29
+
+Host strange
+	HostName strange.rcs.uwaterloo.ca
+	User oscar
+	Port 77
