@@ -1,10 +1,10 @@
 #!/bin/sh
-echo "Packages"
+# packages
 yum update -y
-yum install -y vim git zsh curl wget sudo policycoreutils-python
+yum install -y vim git zsh curl wget sudo policycoreutils-python python3 epel-release
 
-# sanoid
-yum install -y perl-Config-IniFiles perl-Data-Dumper perl-Capture-Tiny lzop mbuffer mhash pv
+# sanoid and epel stuff
+yum install -y perl-Config-IniFiles perl-Data-Dumper perl-Capture-Tiny lzop mbuffer mhash pv python36-jinja2
 
 cat << EOT >> /etc/sudoers
 #
@@ -12,8 +12,6 @@ cat << EOT >> /etc/sudoers
 #
 Defaults rootpw
 EOT
-
-
 
 # SSH KEY
 mkdir /home/quackerd/.ssh
@@ -46,7 +44,7 @@ systemctl start libvirtd
 systemctl enable libvirtd
 
 # zfs
-yum install -y http://download.zfsonlinux.org/epel/zfs-release.el7_6.noarch.rpm
+yum install -y http://download.zfsonlinux.org/epel/zfs-release.el7_7.noarch.rpm
 yum update
 
 # cockpit
@@ -61,11 +59,11 @@ echo "Setting up sshd..."
 semanage port -a -t ssh_port_t -p tcp 77
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
 cat /etc/ssh/sshd_config.backup | \
-sed -E 's/#+PermitRootLogin.*/PermitRootLogin no/g' | \
-sed -E 's/#+PasswordAuthentication.*/PasswordAuthentication no/g' | \
-sed -E 's/#+ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/g' | \
-sed -E 's/#+X11Forwarding.*/X11Forwarding yes/g' | \
-sed -E 's/#+Port .*/Port 77/g' > /etc/ssh/sshd_config
+sed -E 's/#* *PermitRootLogin.*/PermitRootLogin no/g' | \
+sed -E 's/#* *PasswordAuthentication.*/PasswordAuthentication no/g' | \
+sed -E 's/#* *ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/g' | \
+sed -E 's/#* *X11Forwarding.*/X11Forwarding yes/g' | \
+sed -E 's/#* *Port.*/Port 77/g' > /etc/ssh/sshd_config
 
 cat << EOT >> /etc/ssh/sshd_config
 
@@ -87,6 +85,3 @@ firewall-cmd --reload
 firewall-cmd --permanent --add-service=ssh --add-service=http --add-service=https
 firewall-cmd --permanent --remove-service=dhcpv6-client
 firewall-cmd --reload
-
-echo "=========================================================================="
-echo "ZFS KABI-tracking requires manual configuration"
