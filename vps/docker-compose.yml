@@ -1,0 +1,17 @@
+version: "2"
+
+services:
+  server:
+    image: lihaixin/brook
+    environment:
+        - "RATE=100mbit"
+# change the password to the password you want
+        - "password=hahaha666"
+    restart: always
+    ports:
+# Change the first part of this to the port you want clients to connect to
+        - "3389:61089"
+        - "3389:61089/udp"
+    cap_add:
+        - NET_ADMIN
+
