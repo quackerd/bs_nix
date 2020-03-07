@@ -1,10 +1,20 @@
 #!/bin/sh
 # packages
-yum update -y
-yum install -y vim git zsh curl wget sudo policycoreutils-python python3 epel-release
+cp /etc/dnf/dnf.conf /etc/dnf/dnf.conf.backup
+cat /etc/dnf/dnf.conf.backup > sed -E "s/installonly_limit=.*/installonly_limit=2/g" > /etc/dnf/dnf.conf
 
-# sanoid and epel stuff
-yum install -y perl-Config-IniFiles perl-Data-Dumper perl-Capture-Tiny lzop mbuffer mhash pv python36-jinja2
+# remove useless packages
+dnf remove cockpit
+dnf autoremove
+
+dnf update -y
+dnf install -y vim git curl wget sudo epel-release policycoreutils
+
+# zsh
+dnf install -y zsh sqlite
+
+# sanoid
+dnf install -y perl-Data-Dumper lzop mbuffer mhash pv perl-CPAN
 
 cat << EOT >> /etc/sudoers
 #
@@ -25,34 +35,26 @@ chmod 644  /home/quackerd/.ssh/authorized_keys
 
 # DOCKER
 echo "Setting up docker..."
-yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-yum update
-yum install -y docker
-systemctl enable docker
-systemctl start docker
+dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+dnf update
+dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.13-3.1.el7.x86_64.rpm
+dnf install -y docker
+systemctl enable --now docker
 
-curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# DOCKER-COMPOSE
+curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # KVM
-yum -y groupinstall 'Virtualization Host'
-yum install -y virt-manager xauth
+dnf -y groupinstall 'Virtualization Host'
+dnf install -y virt-manager xauth
 systemctl start libvirtd
 systemctl enable libvirtd
 
 # zfs
-yum install -y http://download.zfsonlinux.org/epel/zfs-release.el7_7.noarch.rpm
-yum update
-
-# cockpit
-yum -y install cockpit
-systemctl enable cockpit
-systemctl start cockpit
-# disable root for cockpit
-sed -i '1s/^/auth requisite pam_succeed_if.so uid >= 1000\n/' /etc/pam.d/cockpit
+dnf install -y http://download.zfsonlinux.org/epel/zfs-release.el8_1.noarch.rpm
+dnf update
 
 # SSHD
 echo "Setting up sshd..."
@@ -66,14 +68,9 @@ sed -E 's/#* *X11Forwarding.*/X11Forwarding yes/g' | \
 sed -E 's/#* *Port.*/Port 77/g' > /etc/ssh/sshd_config
 
 cat << EOT >> /etc/ssh/sshd_config
-
-Match address 192.168.2.0/24
-        PermitRootLogin without-password
-        PasswordAuthentication yes
-
 Match address 129.97.75.0/24
         PasswordAuthentication yes
-
+        PermitRootLogin without-password
 EOT
 systemctl restart sshd
 
@@ -82,6 +79,9 @@ echo "Setting up firewall..."
 cp /usr/lib/firewalld/services/ssh.xml /etc/firewalld/services/ssh.xml
 cat /usr/lib/firewalld/services/ssh.xml | sed -E 's/port=\".*\"(.*)/port=\"77\"\1/g' > /etc/firewalld/services/ssh.xml
 firewall-cmd --reload
-firewall-cmd --permanent --add-service=ssh --add-service=http --add-service=https
-firewall-cmd --permanent --remove-service=dhcpv6-client
+firewall-cmd --permanent --add-service=ssh
+firewall-cmd --permanent --remove-service=dhcpv6-client --remove-service=cockpit
 firewall-cmd --reload
+
+echo "Setup completed. Please install perl dependencies for sanoid and switch to zfs kmod repo."
+echo "cpan - install Capture::Tiny - install Config::IniFiles"
