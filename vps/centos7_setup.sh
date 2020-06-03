@@ -60,7 +60,7 @@ sed -E 's/#* *PasswordAuthentication.*/PasswordAuthentication no/g' | \
 sed -E 's/#* *Port.*/Port 77/g' > /etc/ssh/sshd_config
 
 firewall-cmd --remove-service=ssh --permanent
-firewall-cmd --add-port=77 --permanent
+firewall-cmd --add-port=77/tcp --permanent
 firewall-cmd --reload
 
 systemctl restart sshd
