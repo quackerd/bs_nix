@@ -2,8 +2,14 @@
 # packages
 USER=$1
 
+if [ -z "$USER" ]
+then
+    echo "Must specify a user!"
+    exit
+fi
+
 yum update -y
-yum install -y vim git zsh curl wget sudo policycoreutils-python python3 epel-release
+yum install -y yum-utils vim git zsh curl wget sudo policycoreutils-python python3 epel-release
 
 cat << EOT >> /etc/sudoers
 #
@@ -29,13 +35,18 @@ yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 yum update
-yum install -y docker
+yum install -y docker-ce
 systemctl enable --now docker
 systemctl start docker
 
 curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# kernel-ml
+yum install -y yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+yum --enablerepo=elrepo-kernel install kernel-ml
+grub2-set-default 0
 
 # SSHD
 echo "Setting up sshd..."
@@ -44,8 +55,10 @@ cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
 cat /etc/ssh/sshd_config.backup | \
 sed -E 's/#* *PermitRootLogin.*/PermitRootLogin no/g' | \
 sed -E 's/#* *PasswordAuthentication.*/PasswordAuthentication no/g' | \
-sed -E 's/#* *ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/g' | \
 sed -E 's/#* *Port.*/Port 77/g' > /etc/ssh/sshd_config
 
-systemctl restart sshd
+firewall-cmd --remove-service=ssh --permanent
+firewall-cmd --add-port=77 --permanent
+firewall-cmd --reload
 
+systemctl restart sshd
