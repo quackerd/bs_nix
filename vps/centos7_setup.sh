@@ -45,7 +45,7 @@ ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # kernel-ml, bbr
 yum install -y yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
-yum --enablerepo=elrepo-kernel install kernel-ml
+yum --enablerepo=elrepo-kernel install -y kernel-ml
 grub2-set-default 0
 echo 'net.core.default_qdisc=fq' | sudo tee -a /etc/sysctl.conf
 echo 'net.ipv4.tcp_congestion_control=bbr' | sudo tee -a /etc/sysctl.conf
