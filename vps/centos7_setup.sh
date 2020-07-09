@@ -44,7 +44,7 @@ chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # kernel-ml, bbr
-yum install -y yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+yum install -y https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
 yum --enablerepo=elrepo-kernel install -y kernel-ml
 grub2-set-default 0
 echo 'net.core.default_qdisc=fq' | sudo tee -a /etc/sysctl.conf
