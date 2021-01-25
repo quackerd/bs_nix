@@ -1,0 +1,19 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  strategy: free
+    #any_errors_fatal: yes
+  tasks:
+  - name: dnf update
+    dnf:
+      name:  "*"
+      state: latest
+    when: ansible_facts['os_family'] == 'RedHat' and ansible_facts  ['distribution_major_version'] >= '8'
+
+  - name: yum update
+    yum:
+      name: "*"
+      state: latest
+    when: ansible_facts['os_family'] == 'RedHat' and ansible_facts ['distribution_major_version'] <= '7'
+
+
