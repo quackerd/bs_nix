@@ -1,6 +1,7 @@
 - hosts: all
   gather_facts: true
   become: true
+  remote_user: root
   strategy: free
     #any_errors_fatal: yes
   tasks:
