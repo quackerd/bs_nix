@@ -1,0 +1,39 @@
+- hosts: '{{ target }}'
+  gather_facts: false
+  become: true
+  remote_user: root
+  any_errors_fatal: yes
+  tasks:
+  - name: dnf add repo
+    get_url:
+      url: "https://download.docker.com/linux/centos/docker-ce.repo"
+      dest: "/etc/yum.repos.d/docker-ce.repo"
+
+  - name: dnf install
+    dnf:
+      name: ['python3', 'python3-jinja2', 'python3-pip', 'docker-ce']
+      state: latest
+
+  - name: updating pip
+    pip:
+      executable: "/usr/bin/pip3"
+      state: latest
+      name: "pip"
+
+  - name: installing docker-compose
+    pip:
+      executable: "/usr/bin/pip3"
+      state: latest
+      name: "docker-compose"
+
+  - name: symlinking docker-compose
+    file:
+      src: "/usr/local/bin/docker-compose"
+      dest: "/usr/bin/docker-compose"
+      state: link
+
+  - name: enabling docker
+    service:
+      name: docker
+      enabled: yes 
+      state: started

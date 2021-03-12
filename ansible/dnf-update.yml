@@ -3,7 +3,6 @@
   become: true
   remote_user: root
   strategy: free
-    #any_errors_fatal: yes
   tasks:
   - name: dnf update
     dnf:

@@ -9,11 +9,6 @@
       name: firewalld
       state: stopped
 
-  - name: dnf add repo
-    get_url:
-      url: "https://download.docker.com/linux/centos/docker-ce.repo"
-      dest: /etc/yum.repos.d/docker-ce.repo
-
   - name: dnf install epel    
     dnf:
       name: "epel-release"
@@ -26,30 +21,9 @@
 
   - name: dnf install
     dnf:
-      name: ['git', 'vim', 'curl', 'yum-utils', 'policycoreutils-python-utils', 'zsh', 'docker-ce']
+      name: ['git', 'vim', 'curl', 'yum-utils', 'policycoreutils-python-utils']
       state: latest
       update_cache: True
-  
-  - name: Change root password
-    user:
-      name: root 
-      update_password: always 
-      password: "{{ root_password | password_hash('sha512', user_salt) }}"
-
-  - name: add user
-    user:
-      name: quackerd
-      password: "{{ user_password | password_hash('sha512', user_salt) }}"
-      shell: /usr/bin/bash
-      groups: wheel
-      append: yes
-      state: present
-  
-  - name: add user ssh key
-    ansible.posix.authorized_key:
-      user: quackerd
-      state: present
-      key: "{{ lookup('file', '../ssh_pub') }}"
 
   - name: configure sshd
     lineinfile:
@@ -59,9 +33,19 @@
       state: present
       validate: "/usr/sbin/sshd -t -f %s"
     loop:
-      - { key: "PermitRootLogin", value: "without-password" }
-      - { key: "PasswordAuthentication", value: "yes" }
+      - { key: "PermitRootLogin", value: "no" }
+      - { key: "PasswordAuthentication", value: "no" }
       - { key: "Port", value: "77" }
+
+  - name: configure sshd match
+    blockinfile:
+      path: "/etc/ssh/sshd_config"
+      state: present
+      validate: "/usr/sbin/sshd -t -f %s"
+      block: |
+        Match Address 129.97.75.0/24
+          PermitRootLogin without-password 
+          PasswordAuthentication yes
 
   - name: enable selinux
     lineinfile:
@@ -106,12 +90,6 @@
       permanent: yes
       state: disabled
       offline: yes
-
-  - name: enable docker
-    service:
-      name: docker
-      state: started
-      enabled: yes
 
   - name: start firewalld
     service:

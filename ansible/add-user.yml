@@ -1,0 +1,48 @@
+- hosts: '{{ target }}'
+  gather_facts: false
+  become: true
+  remote_user: root
+  any_errors_fatal: yes
+  tasks:
+  - name: dnf install packages
+    dnf:
+      name: ["zsh", "wget", "git"]
+      state: latest
+
+  - name: add user
+    user:
+      name: quackerd
+      password: "{{ password | password_hash('sha512', salt) }}"
+      shell: /usr/bin/sh
+      groups: wheel
+      append: yes
+      state: present
+  
+  - name: add user ssh key
+    ansible.posix.authorized_key:
+      user: quackerd
+      state: present
+      key: "{{ lookup('file', '../ssh_pub') }}"
+
+  - name: download ozsh script
+    get_url:
+      url: "https://git.quacker.org/d/ozsh/raw/branch/master/setup.sh"
+      dest: "/home/quackerd/setup.sh"
+
+  - name: configure user shell
+    become: yes
+    become_user: quackerd
+    shell:
+      cmd: "sh /home/quackerd/setup.sh"
+      creates: "/home/quackerd/.zshrc"
+
+  - name: cleanup ozsh script
+    file:
+      dest: "/home/quackerd/setup.sh"
+      state: absent
+
+  - name: chsh to zsh
+    user:
+      name: quackerd
+      shell: /usr/bin/zsh
+      state: present
