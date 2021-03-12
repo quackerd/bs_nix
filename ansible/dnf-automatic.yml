@@ -1,0 +1,48 @@
+- hosts: '{{ target }}'
+  gather_facts: false
+  become: true
+  remote_user: root
+  tasks:
+  - name: dnf install
+    dnf:
+      name: ['dnf-automatic', 'mailx']
+      state: latest
+      update_cache: True
+
+  - name: configure dnf-automatic
+    lineinfile:
+      path: "/etc/dnf/automatic.conf"
+      regexp: "^(#)?\\s*{{item.key}}"
+      line: "{{item.key}} = {{item.value}}"
+      state: present
+    loop:
+      - { key: "upgrade_type", value: "default" }
+      - { key: "download_updates", value: "yes" }
+      - { key: "apply_updates", value: "no" }
+      - { key: "emit_via", value: "command_email" }
+      - { key: "command_format", value: "\"mail -Ssendwait -s {subject} {email_to}\"" }
+      - { key: "stdin_format", value: "\"{body}\"" }
+      - { key: "email_to", value: "sys@quacker.org" }      
+      - { key: "email_from", value: "no-reply@quacker.org" }    
+  
+  - name: configure mailx
+    lineinfile:
+      path: "/etc/mail.rc"
+      regexp: "^set\\s*{{item.key}}\\s*=.*"
+      line: "set {{item.key}}={{item.value}}"
+      state: present
+    loop:
+      - { key: "smtp", value: "smtps://mx.quacker.org:465" }
+      - { key: "smtp-auth", value: "login" }
+      - { key: "smtp-auth-user", value: "no-reply@quacker.org" }
+      - { key: "smtp-auth-password", value: "{{ smtp_password }}" }
+      - { key: "from", value: "no-reply@quacker.org" }
+
+  - name: send test email
+    ansible.builtin.shell: "echo \"test email from {{ target }}\" | mail -s \"test email from {{ target }}\" sys@quacker.org"
+
+  - name: enable dnf-automatic
+    service:
+      name: dnf-automatic.timer
+      enabled: yes
+      state: started

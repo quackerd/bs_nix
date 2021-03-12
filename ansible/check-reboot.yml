@@ -1,21 +1,14 @@
-- hosts: all
+- hosts: '{{ target }}'
   gather_facts: true
   become: true
   remote_user: root
   strategy: free
-    #any_errors_fatal: yes
   tasks:
   - name: dnf install needs-restarting
     dnf:
       name: "yum-utils"
       state: latest
     when: ansible_facts['os_family'] == 'RedHat' and ansible_facts  ['distribution_major_version'] >= '8'
-
-  - name: yum install needs-restarting
-    yum:
-      name: "yum-utils"
-      state: latest
-    when: ansible_facts['os_family'] == 'RedHat' and ansible_facts ['distribution_major_version'] <= '7'
 
   - name: check reboot
     command: "/usr/bin/needs-restarting -r"

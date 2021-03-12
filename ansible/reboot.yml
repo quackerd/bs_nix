@@ -1,4 +1,4 @@
-- hosts: physical
+- hosts: '{{ target }}'
   gather_facts: false
   become: true
   remote_user: root
