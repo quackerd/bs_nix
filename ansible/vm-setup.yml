@@ -59,7 +59,7 @@
       state: present
       validate: "/usr/sbin/sshd -t -f %s"
     loop:
-      - { key: "PermitRootLogin", value: "no" }
+      - { key: "PermitRootLogin", value: "without-password" }
       - { key: "PasswordAuthentication", value: "yes" }
       - { key: "Port", value: "77" }
 
