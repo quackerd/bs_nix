@@ -47,22 +47,18 @@
           PermitRootLogin without-password 
           PasswordAuthentication yes
 
-  - name: enable selinux
-    lineinfile:
-      path: "/etc/selinux/config"
-      regexp: "^(#)?{{item.key}}=.*"
-      line: "{{item.key}}={{item.value}}"
-      state: present
-    loop:
-      - { key: "SELINUX", value: "enforcing" }
-
   - name: configure selinux
     seport:
       ports: 77
       proto: tcp
       setype: ssh_port_t
       state: present
-  
+
+  - name: start selinux
+    ansible.posix.selinux:
+      policy: targeted
+      state: enforcing
+
   - name: allow ssh port in firewalld
     ansible.posix.firewalld:
       port: 77/tcp
