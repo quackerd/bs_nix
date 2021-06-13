@@ -63,14 +63,9 @@
       name:  "*"
       state: latest
 
-  - name: dnf remove cockpit
-    dnf:
-      name:  "cockpit"
-      state: absent
-  
   - name: dnf install pkgs
     dnf:
-      name: ['python3', 'python3-jinja2', 'python3-pip', 'docker-ce', 'zfs', 'git', 'vim', 'curl', 'wget', 'yum-utils', 'dnf-automatic', 'mailx', 'lldpd', 'xauth', 'virt-manager', 'kmod-wireguard', 'lzop', 'mbuffer', 'mhash', 'pv', 'perl-Data-Dumper', 'perl-CPAN']
+      name: ['python3', 'python3-jinja2', 'python3-pip', 'docker-ce', 'zfs', 'git', 'vim', 'curl', 'wget', 'yum-utils', 'dnf-automatic', 'mailx', 'lldpd', 'xauth', 'virt-manager', 'kmod-wireguard', 'lzop', 'mbuffer', 'mhash', 'pv', 'perl-Data-Dumper', 'perl-CPAN', 'perl-App-cpanminus']
       state: latest
 
   - name: dnf install virt group
@@ -177,6 +172,12 @@
     service:
       name: libvirtd
       state: started
+      enabled: no
+
+  - name: stop and disable cockpit
+    service:
+      name: cockpit
+      state: stopped
       enabled: no
 
   - name: start and enable lldpd
