@@ -1,0 +1,12 @@
+- hosts: '{{ target }}'
+  gather_facts: false
+  become: true
+  remote_user: root
+  serial: 0
+  any_errors_fatal: true
+  tasks:
+  - name: reboot
+    reboot:
+
+
+
